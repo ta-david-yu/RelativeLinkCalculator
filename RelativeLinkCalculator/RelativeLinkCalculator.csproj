@@ -11,4 +11,10 @@
     <PackageReference Include="NanoXLSX" Version="2.3.0" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Update="Run.bat">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
 </Project>
