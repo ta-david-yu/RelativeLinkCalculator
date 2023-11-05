@@ -15,8 +15,6 @@ namespace RelativeLinkCalculator // Note: actual namespace depends on the projec
 		const int kPositionColumn = 4;				// 身分別
 		const int kRelativeOrSummaryColumn = 5;		// 親屬/總說明
 
-		static readonly Regex kIndependentDirectorPositionPattern = new Regex(@"獨立董事");
-		static readonly Regex kBoardPositionPattern = new Regex(@"董事");
 		static readonly Regex kNotRelativeColumnPattern = new Regex(@"集團");
 
 		class CompanyData
@@ -118,13 +116,13 @@ namespace RelativeLinkCalculator // Note: actual namespace depends on the projec
 				{
 					string positionName = positionCell.Value.ToString();
 
-					bool isIndependentDirector = kIndependentDirectorPositionPattern.IsMatch(positionName);
+					bool isIndependentDirector = positionName.IsIndependentDirectorPosition();
 					if (isIndependentDirector) 
 					{
 						currentCompanyData.IndependentDirectorCount++;
 					}
 
-					bool isBoardMember = kBoardPositionPattern.IsMatch(positionName);
+					bool isBoardMember = positionName.IsBoardMemberPosition();
 					if (isBoardMember)
 					{
 						currentCompanyData.BoardPositionCount++;
@@ -138,7 +136,7 @@ namespace RelativeLinkCalculator // Note: actual namespace depends on the projec
 					continue;
 				}
 
-				bool isRelativeCell = relativeCell.DataType == Cell.CellType.STRING && !kNotRelativeColumnPattern.IsMatch(relativeCell.Value.ToString());
+				bool isRelativeCell = relativeCell.DataType == Cell.CellType.STRING && relativeCell.Value.ToString().IsCollectionOfRelatives();
 				if (isRelativeCell) 
 				{
 					string allRelativeNameInput = relativeCell.Value.ToString();

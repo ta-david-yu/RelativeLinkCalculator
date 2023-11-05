@@ -8,8 +8,12 @@ using System.Threading.Tasks;
 
 namespace RelativeLinkCalculator.Extensions
 {
-	internal static class Extensions
+	public static class Extensions
 	{
+		static readonly Regex kIndependentDirectorPositionPattern = new Regex(@"獨立董事");
+		static readonly Regex kBoardPositionPattern = new Regex(@"董事");
+		static readonly Regex kGroupHolderColumnPattern = new Regex(@"集團");
+
 		public static bool TryGetCell(this Worksheet sheet, Address address, out Cell cell)
 		{
 			if (sheet == null) 
@@ -31,6 +35,21 @@ namespace RelativeLinkCalculator.Extensions
 		public static bool IsNullOrEmpty(this string str)
 		{
 			return str == null || str.Length == 0;
+		}
+
+		public static bool IsBoardMemberPosition(this string str)
+		{
+			return kBoardPositionPattern.IsMatch(str);
+		}
+
+		public static bool IsIndependentDirectorPosition(this string str)
+		{
+			return kIndependentDirectorPositionPattern.IsMatch(str);
+		}
+
+		public static bool IsCollectionOfRelatives(this string str)
+		{
+			return !kGroupHolderColumnPattern.IsMatch(str);
 		}
 
 		public static bool TryExtractRelativeName(this string input, out string name)
