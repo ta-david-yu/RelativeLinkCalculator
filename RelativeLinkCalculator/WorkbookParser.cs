@@ -2,8 +2,10 @@
 using RelativeLinkCalculator.Extensions;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace RelativeLinkCalculator
@@ -41,8 +43,6 @@ namespace RelativeLinkCalculator
 
 			IReadOnlyList<Cell> columnA = sheet.GetColumn("A");
 			int numberOfEntries = columnA.Count;
-
-			System.Console.Write($"Number Of Entries: {numberOfEntries}\n\n");
 
 			List<CompanyData> companyDataCollection = new List<CompanyData>();
 			CompanyData currentCompanyData = new CompanyData();
@@ -96,7 +96,7 @@ namespace RelativeLinkCalculator
 					currentCompanyData = new CompanyData();
 					currentCompanyData.Name = companyName;
 
-					System.Console.WriteLine($"-- {companyName} --");
+					//System.Console.WriteLine($"-- {companyName} --");
 				}
 
 				// Do various counting.
@@ -154,11 +154,11 @@ namespace RelativeLinkCalculator
 
 						if (hasLinkBeenRecorded)
 						{
-							System.Console.WriteLine($"{relativeName} - {holderName} (DUPLICATE)");
+							//System.Console.WriteLine($"{relativeName} - {holderName} (DUPLICATE)");
 							continue;
 						}
 
-						System.Console.WriteLine($"{holderName} - {relativeName}");
+						//System.Console.WriteLine($"{holderName} - {relativeName}");
 					}
 				}
 			}
@@ -202,6 +202,66 @@ namespace RelativeLinkCalculator
 			}
 
 			return companyDataCollection;
+		}
+
+		public static void OutputCompanyDataCollectionToWorkbook(string industryCodeStr, List<CompanyData> companyDataCollection, Workbook workbook, string outputPath)
+		{
+			bool isValidIndustryCode = int.TryParse(industryCodeStr, out int industryCode);
+			Worksheet sheet = workbook.CurrentWorksheet;
+
+			Regex companyStockCodePattern = new Regex(@"^\d+");
+
+			int rowIndexOffset = sheet.GetColumn(0).Count;
+			for (int rowIndex = 0; rowIndex < companyDataCollection.Count; rowIndex++)
+			{
+				CompanyData companyData = companyDataCollection[rowIndex];
+				int actualRowIndex = rowIndexOffset + rowIndex;
+
+				Match companyStockCodeMatch = companyStockCodePattern.Match(companyData.Name);
+				if (!companyStockCodeMatch.Success )
+				{
+					sheet.AddCell(companyData.Name, 0, actualRowIndex);     // A 
+				}
+				else
+				{
+					string stockCodeStr = companyStockCodeMatch.Value;
+					bool isValidStockCode = int.TryParse(stockCodeStr, out int stockCode);
+					if (isValidStockCode)
+					{
+						sheet.AddCell(stockCode, 0, actualRowIndex);     // A 
+					}
+					else
+					{
+						sheet.AddCell(companyData.Name, 0, actualRowIndex);     // A 
+					}
+				}
+
+				//sheet.AddCell("(year)", 1, actualRowIndex);					// B
+
+				if (isValidIndustryCode)
+				{
+					sheet.AddCell(industryCode, 2, actualRowIndex);     // C
+				}
+				else
+				{
+					sheet.AddCell(industryCodeStr, 2, actualRowIndex);     // C
+				}
+
+				sheet.AddCell(companyData.RelativeLinkCount, 3, actualRowIndex);     // D
+				sheet.AddCell(companyData.TotalPositionCount, 4, actualRowIndex);     // E
+				sheet.AddCell(companyData.IndependentDirectorCount, 5, actualRowIndex);     // F
+				//sheet.AddCell("(ind_board)", 6, actualRowIndex);     // G
+				//sheet.AddCell("(general_position)", 7, actualRowIndex);     // H
+				//sheet.AddCell("(plinks)", 8, actualRowIndex);     // I
+				//sheet.AddCell("(links/plinks)", 9, actualRowIndex);     // J
+				sheet.AddCell(companyData.BoardRelativeLinkCount, 10, actualRowIndex);     // K
+				sheet.AddCell(companyData.BoardPositionCount, 11, actualRowIndex);     // L
+				//sheet.AddCell("(cor_board)", 12, actualRowIndex);     // M
+				//sheet.AddCell("(general_board_position)", 13, actualRowIndex);     // N
+				//sheet.AddCell("(board_links/gernal_board_position)", 14, actualRowIndex);     // O
+			}
+
+			workbook.SaveAs(outputPath);
 		}
 	}
 }
