@@ -58,15 +58,15 @@ namespace RelativeLinkCalculator
 				bool isSumUpRow = !sheet.TryGetCell(holderNameAddress, out Cell holderNameCell) || holderNameCell.DataType != Cell.CellType.STRING;
 				if (isSumUpRow)
 				{
-					// If holder name cell cannot be found), it means the row is a sum-up row (i.e., not an legal individual);
+					// If holder name cell cannot be found, it means the row is a sum-up row (i.e., not an legal individual);
 					// therefore we want to skip these rows.
 					continue;
 				}
 
-				string holderName = holderNameCell.Value.ToString();
+				string holderName = holderNameCell.Value != null? holderNameCell.Value.ToString() : "";
 				if (holderName.IsNullOrEmpty())
 				{
-					// If holder name cell cannot be found), it means the row is a sum-up row (i.e., not an legal individual);
+					// If holder name cell cannot be found, it means the row is a sum-up row (i.e., not an legal individual);
 					// therefore we want to skip these rows.
 					continue;
 				}
@@ -77,7 +77,7 @@ namespace RelativeLinkCalculator
 					continue;
 				}
 
-				string companyName = companyCodeCell.Value.ToString();
+				string companyName = companyCodeCell.Value != null? companyCodeCell.Value.ToString() : "";
 				if (companyName.IsNullOrEmpty())
 				{
 					System.Console.WriteLine($"Row {rowIndex} has a null/empty company name (公司代碼), skip this row.");
@@ -95,15 +95,20 @@ namespace RelativeLinkCalculator
 					// Reset data counters
 					currentCompanyData = new CompanyData();
 					currentCompanyData.Name = companyName;
-
-					//System.Console.WriteLine($"-- {companyName} --");
 				}
 
 				// Do various counting.
 
 				currentCompanyData.TotalPositionCount++;
 
-				bool hasPositionCell = sheet.TryGetCell(positionAddress, out Cell positionCell) && !positionCell.Value.ToString().IsNullOrEmpty();
+				bool hasPositionCell = sheet.TryGetCell(positionAddress, out Cell positionCell);
+				bool hasValidPosition = hasPositionCell && positionCell.Value != null && !positionCell.Value.ToString().IsNullOrEmpty();
+				if (!hasValidPosition)
+				{
+					System.Console.WriteLine($"Row {rowIndex} ({holderName}) has a null position name (身份別), skip this row.");
+					continue;
+				}
+
 				if (hasPositionCell)
 				{
 					string positionName = positionCell.Value.ToString();

@@ -126,5 +126,18 @@ namespace CalculatorTests
 			Assert.AreEqual(1, companyDataCollection[9].BoardRelativeLinkCount);
 			Assert.AreEqual(0, companyDataCollection[10].BoardRelativeLinkCount);
 		}
+
+		[TestMethod]
+		public void ParseWorkbook2()
+		{
+			System.Console.OutputEncoding = Encoding.Unicode;
+			string fileName = "TestFiles//2019電器電纜.xlsx";
+
+			Workbook workbook = Workbook.Load(fileName);
+			var companyDataCollection = WorkbookParser.ParseCompanyDataWorkbook(workbook);
+
+			int numberOfCompanies = companyDataCollection.Count;
+			Assert.AreEqual(15, numberOfCompanies);
+		}
 	}
 }
