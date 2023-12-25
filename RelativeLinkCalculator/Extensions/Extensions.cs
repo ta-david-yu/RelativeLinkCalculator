@@ -10,8 +10,8 @@ namespace RelativeLinkCalculator.Extensions
 {
 	public static class Extensions
 	{
-		static readonly Regex kIndependentDirectorPositionPattern = new Regex(@"獨立董事");
-		static readonly Regex kBoardPositionPattern = new Regex(@"董事");
+		static readonly Regex kIndependentDirectorPositionPattern = new Regex(@"獨立董事|獨董");
+		static readonly Regex kBoardPositionPattern = new Regex(@"董事|副董|常董|獨董");
 		static readonly Regex kGroupHolderColumnPattern = new Regex(@"集團");
 
 		public static bool TryGetCell(this Worksheet sheet, Address address, out Cell cell)
